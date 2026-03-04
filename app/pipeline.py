@@ -5,6 +5,7 @@ from app.database import engine,SessionLocal
 from app.models import Base,DailyPrice
 from sqlalchemy import func
 import pandas as pd
+from app.market_calendar import is_market_open
 
 def get_latest_trade_date():
     session=SessionLocal()
@@ -27,6 +28,12 @@ def run_backfill():
 # increamental data pipeline function
 
 def run_increamental():
+
+    print("Checking market status...")
+
+    if not is_market_open():
+        print("Skipping incremental run ...")
+        return
     print("Running incremental ingestion ...")
 
     Base.metadata.create_all(bind=engine)
@@ -37,17 +44,12 @@ def run_increamental():
     df=transform(df)
 
     if latest_date:
-        print(f"Latest trade in DB :{latest_date}")
-        df=df[df["Daily Date"]>pd.to_datetime(latest_date)]
+        df = df[df["Daily Date"] > pd.to_datetime(latest_date)]
 
         if df.empty:
-            print("No new record found..")
+            print("No new records found.")
             return
-        print(f"New records found: {len(df)}")
-
-    else:
-        print("No existing data found. Performing first time load")
 
     load_data(df)
 
-    print("Incremental ingestion completed ..")
+    print("Incremental ingestion completed.")
