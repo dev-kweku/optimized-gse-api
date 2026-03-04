@@ -1,0 +1,11 @@
+requests
+pandas
+lxml
+sqlalchemy
+psycopg2-binary
+python-dotenv
+fastapi
+uvicorn[standard]
+tenacity
+cloudscraper
+pyarrow
