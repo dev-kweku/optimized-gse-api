@@ -7,21 +7,21 @@ import re
 Base = declarative_base()
 
 class TradeSchema(BaseModel):
-    """Pydantic Filter: Validates API data before it touches the DB."""
-    # Note: We use the indices as aliases to match the GSE AJAX response
-    date_str: str = Field(..., alias="0")
-    symbol: str = Field(..., alias="1")
-    close_price: str = Field("0", alias="6")
-    volume: str = Field("0", alias="10")
+    # Mapping to the payload indices you provided
+    daily_date: str = Field(..., alias="1")
+    symbol: str = Field(..., alias="2")
+    prev_close: str = Field("0", alias="5")
+    open_price: str = Field("0", alias="6")
+    last_price: str = Field("0", alias="7")
+    close_price: str = Field("0", alias="8")
+    volume: str = Field("0", alias="12")
+    value: str = Field("0", alias="13")
 
-    # In Pydantic V2, we list the actual field names defined in the model, 
-    # not the aliases, inside the validator.
-    @field_validator('close_price', 'volume', mode='before')
+    @field_validator('prev_close', 'open_price', 'last_price', 'close_price', 'volume', 'value', mode='before')
     @classmethod
-    def clean_val(cls, v):
-        if v is None:
-            return "0"
-        # Remove anything that isn't a digit or a decimal point
+    def clean_numeric(cls, v):
+        if not v: return "0"
+        # Strip everything except numbers and decimals
         cleaned = re.sub(r'[^\d.]', '', str(v))
         return cleaned if cleaned else "0"
 

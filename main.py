@@ -21,7 +21,7 @@ def run_pipeline():
     db = SessionLocal()
     
     try:
-       
+    
         engine = GSEEngine(db)
         engine.sync()
         logger.info("Pipeline executed successfully.")
